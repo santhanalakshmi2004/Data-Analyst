@@ -1,0 +1,57 @@
+import pandas as pd
+
+def demographic_data_analyzer():
+    # Load the dataset
+    df = pd.read_csv('adult.data.csv')
+    
+    # 1. Number of people by race
+    race_count = df['race'].value_counts()
+
+    # 2. Average age of men
+    average_age_men = df[df['sex'] == 'Male']['age'].mean()
+
+    # 3. Percentage of people with a Bachelor's degree
+    total_people = len(df)
+    bachelors_count = len(df[df['education'] == 'Bachelors'])
+    percentage_bachelors = (bachelors_count / total_people) * 100
+
+    # 4. Percentage of people with advanced education (Bachelors, Masters, Doctorate) earning >50K
+    advanced_education = df['education'].isin(['Bachelors', 'Masters', 'Doctorate'])
+    higher_education = df[advanced_education]
+    percentage_advanced_education_high_income = (higher_education[higher_education['salary'] == '>50K'].shape[0] / higher_education.shape[0]) * 100
+
+    # 5. Percentage of people without advanced education earning >50K
+    lower_education = df[~advanced_education]
+    percentage_lower_education_high_income = (lower_education[lower_education['salary'] == '>50K'].shape[0] / lower_education.shape[0]) * 100
+
+    # 6. Minimum hours worked per week
+    min_work_hours = df['hours-per-week'].min()
+
+    # 7. Percentage of people working minimum hours earning >50K
+    min_workers = df[df['hours-per-week'] == min_work_hours]
+    percentage_min_workers_high_income = (min_workers[min_workers['salary'] == '>50K'].shape[0] / min_workers.shape[0]) * 100
+
+    # 8. Country with highest percentage of people earning >50K
+    country_income = df[df['salary'] == '>50K'].groupby('native-country').size() / df.groupby('native-country').size() * 100
+    highest_earning_country = country_income.idxmax()
+    highest_earning_country_percentage = country_income.max()
+
+    # 9. Most popular occupation in India for those earning >50K
+    india_occupation = df[(df['native-country'] == 'India') & (df['salary'] == '>50K')]
+    top_IN_occupation = india_occupation['occupation'].value_counts().idxmax()
+
+    # Store the results in a dictionary to return
+    results = {
+        'race_count': race_count,
+        'average_age_men': round(average_age_men, 1),
+        'percentage_bachelors': round(percentage_bachelors, 1),
+        'percentage_advanced_education_high_income': round(percentage_advanced_education_high_income, 1),
+        'percentage_lower_education_high_income': round(percentage_lower_education_high_income, 1),
+        'min_work_hours': min_work_hours,
+        'percentage_min_workers_high_income': round(percentage_min_workers_high_income, 1),
+        'highest_earning_country': highest_earning_country,
+        'highest_earning_country_percentage': round(highest_earning_country_percentage, 1),
+        'top_IN_occupation': top_IN_occupation
+    }
+
+    return results
